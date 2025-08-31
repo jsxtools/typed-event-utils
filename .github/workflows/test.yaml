@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run tests and collect coverage
+        id: tests
+        run: |
+          # Generate lcov coverage report
+          echo "Generating lcov coverage..."
+          if LCOV_OUTPUT=$(node --test --experimental-test-coverage --test-coverage-exclude="test/*" --test-reporter=lcov 2>&1); then
+            echo "status=passing" >> $GITHUB_OUTPUT
+            echo "color=brightgreen" >> $GITHUB_OUTPUT
+            echo "lcov<<EOF" >> $GITHUB_OUTPUT
+            echo "$LCOV_OUTPUT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "status=failing" >> $GITHUB_OUTPUT
+            echo "color=red" >> $GITHUB_OUTPUT
+            echo "Coverage generation failed, but tests may have passed:"
+            echo "$LCOV_OUTPUT"
+            exit 1
+          fi
+
+      - name: Generate badges
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Generate coverage data from step output
+          LCOV_DATA="${{ steps.tests.outputs.lcov }}"
+          COVERAGE=$(echo "$LCOV_DATA" | grep -o 'LF:[0-9]*' | awk -F: '{found+=$2} END {print found}')
+          TOTAL=$(echo "$LCOV_DATA" | grep -o 'LH:[0-9]*' | awk -F: '{hit+=$2} END {print hit}')
+          PERCENTAGE=$(awk "BEGIN {printf \"%.1f\", ($TOTAL/$COVERAGE)*100}")
+
+          if (( $(echo "$PERCENTAGE >= 90" | bc -l) )); then
+            COV_COLOR="brightgreen"
+          elif (( $(echo "$PERCENTAGE >= 80" | bc -l) )); then
+            COV_COLOR="yellow"
+          else
+            COV_COLOR="red"
+          fi
+
+          # Create orphan branch for badges
+          git checkout --orphan badges || git checkout badges
+          git rm -rf . 2>/dev/null || true
+
+          # Create both badges
+          echo "{\"schemaVersion\": 1, \"label\": \"tests\", \"message\": \"${{ steps.tests.outputs.status }}\", \"color\": \"${{ steps.tests.outputs.color }}\"}" > tests.json
+          echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${PERCENTAGE}%\", \"color\": \"${COV_COLOR}\"}" > coverage.json
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add tests.json coverage.json
+          git commit -m "Update badges"
+          git push origin badges --force
