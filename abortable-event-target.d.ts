@@ -1,15 +1,23 @@
-import type { Events, EventTarget } from "./event-target.d.ts"
+import type { Events, EventTarget, EventTargetConstructor } from "./event-target.d.ts"
 
 export var AbortableEventTarget: AbortableEventTargetConstructor
 
-/** The **`AbortableEventTarget()`** constructor creates a new AbortableEventTarget object instance. */
-export interface AbortableEventTargetConstructor {
+/**
+ * The **`AbortableEventTarget()`** constructor creates a new AbortableEventTarget object instance.
+ * 
+ * [GitHub Reference](https://github.com/jsxtools/typed-event-utils#abortableeventtargett)
+ */
+export interface AbortableEventTargetConstructor extends EventTargetConstructor {
 	new <T extends Events>(): AbortableEventTarget<T>
 
 	prototype: AbortableEventTarget
 }
 
-/** The **`AbortableEventTarget`** interface is implemented by objects that can receive events and may have listeners for them. */
+/**
+ * The **`AbortableEventTarget`** interface is implemented by objects that can receive events and may have listeners for them.
+ * 
+ * [GitHub Reference](https://github.com/jsxtools/typed-event-utils#abortableeventtargett)
+ */
 export interface AbortableEventTarget<T extends Events = Events> extends EventTarget<T> {
 	/** The **`signal`** read-only property of the AbortableEventTarget interface returns an AbortSignal object instance, which can be used to abort all listeners on the object. */
 	readonly signal: AbortSignal;

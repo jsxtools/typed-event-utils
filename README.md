@@ -9,7 +9,11 @@ A collection of type-safe utilities for working with events.
 
 - **Type-safe Event**: Strongly typed Event constructor with enhanced type safety
 - **Type-safe EventTarget**: Strongly typed event handling with full TypeScript support
+
+## Extra Features
+
 - **AbortableEventTarget**: EventTarget with built-in abort functionality for automatic cleanup
+- **ComposedEvent**: Event with additional features for working across shadow DOM boundaries
 
 ## Installation
 
@@ -26,10 +30,10 @@ The `Event` constructor provides type safety for event creation with enhanced ta
 ```typescript
 import { Event } from "typed-event-utils/event"
 
-// create a typed event with target type information
+// create an event with a typed target
 const event = new Event<HTMLButtonElement>("click")
 
-// the event has properly typed currentTarget and target properties
+// the event has typed currentTarget and target properties
 // event.currentTarget: HTMLButtonElement
 // event.target: HTMLButtonElement
 ```
@@ -47,17 +51,17 @@ type Events = {
   "error": ErrorEvent
 }
 
-// create a typed event target
+// create an event target with typed events
 const target = new EventTarget<Events>()
 
 // add event listeners with full type safety
 target.addEventListener("success", (event) => {
-  // event.detail is properly typed with { message: string }
+  // event.detail is typed to be { message: string }
   console.log("success message:", event.detail.message)
 })
 
 target.addEventListener("error", (event) => {
-  // event is properly typed as an ErrorEvent
+  // event is typed to be an ErrorEvent
   console.log(event.message)
 })
 
@@ -96,17 +100,40 @@ target.abort()
 console.log(target.signal.aborted) // true after abort()
 ```
 
+### ComposedEvent
+
+The `ComposedEvent` class extends `Event` to improve working across shadow DOM boundaries.
+
+```typescript
+import { ComposedEvent } from "typed-event-utils/composed-event"
+
+// create an event with a typed compose target
+const event = new ComposedEvent<HTMLButtonElement>("click")
+
+// a composed event is automatically composed
+// event.composed: true
+
+// a composed event includes a typed composedTarget property
+// event.composedTarget: HTMLButtonElement
+
+// a composed event has typed currentTarget and target properties
+// event.currentTarget: HTMLButtonElement
+// event.target: HTMLButtonElement
+```
+
 ## API Reference
 
-### Event\<T, U\>
+### Event\<T,U\>
 
 A generic `Event` constructor that provides type safety for event creation with enhanced target typing.
 
-- `new Event<T, U>(type, eventInitDict?)`: Creates a typed event with target type information.
+- `new Event<T, U>(type, eventInit?)`: Creates a typed event with target type information.
+
+
 
 ### EventTarget\<T\>
 
-A generic `EventTarget` that provides type safety for event handling.
+A generic `EventTarget` constructor that provides type safety for event handling.
 
 - `new EventTarget<T>()`: Creates a typed event target with typed events.
 
@@ -116,21 +143,35 @@ A generic `EventTarget` that provides type safety for event handling.
 - `removeEventListener(type, listener, options?)`: Removes a typed event listener.
 - `dispatchEvent(event)`: Dispatches a typed event.
 
+
+
 ### AbortableEventTarget\<T\>
 
-Extends `EventTarget` with automatic cleanup capabilities.
+An extended `EventTarget` constructor with built-in abort functionality.
 
 - `new EventTarget<T>()`: Creates a typed event target with typed events and cleanup capabilities.
 
 #### Methods
 
-Extends `EventTarget` methods.
+The `AbortableEventTarget` methods extend generic `EventTarget` methods.
 
 - `abort(reason?)`: Aborts all event listeners on the target.
 
 #### Properties
 
 - `signal`: Read-only `AbortSignal` for the event target.
+
+
+
+### ComposedEvent\<C,T,U\>
+
+An extended `Event` constructor with additional features for working across shadow DOM boundaries.
+
+- `new Event<C, T, U>(type, composedEventInit?)`: Creates a composed event with target type information.
+
+#### Properties
+
+- `composedTarget`: Read-only `EventTarget` representing the first target in the composed path, otherwise `null`.
 
 <br />
 

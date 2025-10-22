@@ -21,7 +21,7 @@ export interface EventConstructor {
  *
  * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/API/Event)
  */
-export type Event<T extends EventTarget = EventTarget, U extends EventTarget = T> = globalThis.Event & {
+export interface Event<T extends EventTarget = EventTarget, U extends EventTarget = T> extends globalThis.Event {
 	readonly currentTarget: T | null
 	readonly target: U | null
 }

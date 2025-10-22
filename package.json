@@ -1,18 +1,21 @@
 {
 	"name": "typed-event-utils",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"type": "module",
 	"main": "./event-target.js",
 	"types": "./event-target.d.ts",
 	"exports": {
 		".": "./event-target.js",
 		"./abortable-event-target": "./abortable-event-target.js",
+		"./composed-event": "./composed-event.js",
 		"./event": "./event.js",
 		"./event-target": "./event-target.js"
 	},
 	"files": [
 		"abortable-event-target.js",
 		"abortable-event-target.d.ts",
+		"composed-event.js",
+		"composed-event.d.ts",
 		"event.js",
 		"event.d.ts",
 		"event-target.js",
